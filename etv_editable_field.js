@@ -54,6 +54,41 @@
 
             var options = $.extend(defaults, options);
 
+            //messanger object
+            messanger = {}
+
+            // messanger method set error
+            messanger.set_error = function(message) {
+                $('.info').css({
+                    'display': 'none'
+                })
+                $('.error').html(message)
+                $('.error').css({
+                    'display': 'block'
+                })
+
+            }
+
+            // messanger method set info
+            messanger.set_info = function(message) {
+                $('.info').html(message)
+                $('.info').css({
+                    'display': 'block'
+                })
+            }
+
+
+            messanger.clear = function() {
+                $('.error').css({
+                    'display': 'none'
+                })
+                $('.info').css({
+                    'display': 'none'
+                })
+                $('.error').css({
+                    'display': 'none'
+                })
+            }
 
 
             // COMMENT FORM OBJECT
@@ -88,6 +123,10 @@
                 comment_obj.fields.comment = comment_obj.find('textarea').attr('value')
                 comment_obj.fields.communication = comment_obj.find('#id_communication').val()
             }
+            
+            comment_obj.clear_text = function(){
+                comment_obj.fields.comment = comment_obj.find('textarea').attr('value','')
+            }
 
 
             // is_valid method for comment window fields,  return true if valid otherwise false
@@ -97,14 +136,15 @@
                 if (!comment_obj.fields.comment & raise) {
                     valid = false
                     //alert("Please vedite commentatij k izmeneniyam")
-                    $('.error').html('vvedite commentarij k izmeneniyam please')
-                    $('.error').css({'display':'block'})
+                    messanger.set_error('Введите коментарий к изменениям пожалуйста')
                     comment_obj.warning_blink()
-                } else { 
-                    $('.error').css({'display':'none'}) 
-                    }
-                if (!raise){
-                    valid = true 
+                } else {
+                    $('.error').css({
+                        'display': 'none'
+                    })
+                }
+                if (!raise) {
+                    valid = true
                 }
                 return valid
             }
@@ -123,7 +163,6 @@
             })
 
             // END COMMENT OBJECT
-
             return this.each(function() {
                 var op = options;
 
@@ -133,14 +172,26 @@
                 var obj = $(this);
 
 
+                obj.set_opend = function(is_opend) {
+                    obj.is_opend = is_opend
+                    obj.attr('is_opend', (is_opend) ? 1: 0)
+                }
+
+
+                obj.set_changed = function(changed) {
+                    obj.changed = changed
+                    obj.attr('changed', changed)
+                }
+
+
 
                 //initialise fields attributes in obj
                 obj.clean_obj = function() {
                     obj.fields = []
                     obj.fields_obj = {}
                     obj.fields_val = {}
-                    obj.is_opend = false
-                    obj.changed = false
+                    obj.set_opend(false)
+                    obj.set_changed(false)
                 }
                 obj.clean_obj()
 
@@ -165,7 +216,9 @@
                 obj.lock_fields = function() {
                     $(obj.fields).each(function(index, name) {
                         field = obj.fields_obj[name]
-                        field.css({'display':'inline'})
+                        field.css({
+                            'display': 'inline'
+                        })
                         if (field.field_type == 'input') {
                             text = field.find('input').attr('value')
                             field.find('input').css({
@@ -179,9 +232,17 @@
                             field.find('select').css({
                                 'display': 'none'
                             })
+                            
                             field.prepend("<div class='selected_text' style='display:inline'>" + text + "</div>")
                         }
-                        obj.is_opend = false
+                        
+                        
+                        if (name == 'password1' || name == 'password2'){
+                            field.find('.input_text').remove()
+                        }
+                        
+                        obj.set_opend(false)
+                        field.find('b').remove()
 
                     })
                 }
@@ -195,18 +256,38 @@
                         field = obj.fields_obj[name]
                         if (field.field_type == 'input') {
                             field.find('.input_text').remove()
-                            field.find('input').css({
-                                'display': 'inline'
-                            })
+
+                            if (field.label) {
+                                field.prepend('<b>' + field.label + '</b>')
+                                field.find('input').css({
+                                    'display': 'block'
+                                })
+                            } else {
+                                field.find('input').css({
+                                    'display': 'inline'
+                                })
+                            }
+
                         }
 
                         if (field.field_type == 'select') {
                             field.find('.selected_text').remove()
-                            field.find('select').css({
-                                'display': 'inline'
-                            })
+
+                            if (field.label) {
+
+                                field.prepend('<b>' + field.label + '</b>')
+                                field.find('select').css({
+                                    'display': 'block'
+                                })
+                            } else {
+
+                                field.find('select').css({
+                                    'display': 'inline'
+                                })
+                            }
+
                         }
-                        obj.is_opend = true
+                        obj.set_opend(true)
                     })
                 }
 
@@ -237,7 +318,6 @@
 
 
 
-
                 //obj method to get fields and values for each field
                 obj.read_fields = function() {
                     self = this
@@ -246,6 +326,10 @@
                     related_imputs.each(function(item, o) {
 
                         var o = $(o)
+
+                        o.find('input').css({
+                            'width': '150px'
+                        })
 
                         //method of field that reeds value from input
                         o.readmyself = function() {
@@ -261,16 +345,22 @@
                         var val = o.find('input').attr('value')
 
 
+                        var label = o.attr('label')
+
+
+
                         //bind keypress for this field input so when user hit enter it sends data to the server
-                        o.bind('keypress',
+                        o.find('input').bind('keydown',
                         function(e) {
                             if (e.keyCode == 13) {
                                 obj.click()
                             } else {
                                 o.readmyself()
-                                obj.changed = true
+                                obj.set_changed(true)
                             }
                         })
+
+                        o.label = label
 
                         // save list of fields
                         obj.fields.push(name)
@@ -292,10 +382,25 @@
 
                         var name = o.find('select').attr('name')
                         var val = o.find('select').attr('value')
+                        
+                        if (!(name == 'exp_month' || name == 'exp_year')){
+                            o.find('select').css({
+                                'width': '150px'
+                            })
+                        }
+                        
+                        
+                        
+                        var label = o.attr('label')
                         // method to read values from field
                         o.readmyself = function() {
                             var o_val = this.find('select').attr('value')
-                            obj.fields_val[name] = o_val
+                            if (this.find('select').attr('disabled') == false) {
+                                 obj.fields_val[name] = o_val
+                            } else { 
+                                delete obj.fields_val[name]
+                            }
+                            
                             return o_val
                         }
 
@@ -303,10 +408,10 @@
                         o.find('select').bind('change',
                         function(item) {
                             o.readmyself()
-                            obj.changed = true
+                            obj.set_changed(true)
                         })
 
-
+                        o.label = label
                         o.readmyself()
                         obj.fields.push(name)
                         obj.fields_obj[name] = o
@@ -315,9 +420,24 @@
 
                 }
 
+                obj.clear_errors = function() {
+                    $(obj.fields).each(function(index, name) {
+                        obj.fields_obj[name].parent().find('.errorlist').remove();
+                    })
+                }
+
+                obj.add_errors = function(name, message) {
+                    if (name == '__all__') {
+                        obj.fields_obj['cc_num'].append('<ul class="errorlist"><li>' + message[0] + '</li></ul>')
+                    } else {
+                        obj.fields_obj[name].append('<ul class="errorlist"><li>' + message[0] + '</li></ul>')
+                    }
+                }
+
 
                 //method save to save object on the server
                 obj.save = function() {
+
                     obj.saved = true
                     data = {}
                     $.extend(data, this.fields_val, comment_obj.fields)
@@ -331,16 +451,33 @@
                             url: this.url,
                             data: data,
                             success: function(resp) {
-                                
+                                if (resp['messages']) {
+                                    messanger.set_info(resp['messages'])
+                                    obj.clear_errors()
+                                    if (!objects_is_opend()) {
+                                       comment_obj.clear_text()   
+                                    }
+                                    obj.set_changed(false)
+                                } else if (resp['errors']) {
+                                    obj.clear_errors()
+                                    $.each(resp['errors'],
+                                    function(name, value) {
+                                        obj.add_errors(name, value)
+                                    })
+                                    
+                                    obj.unlock_fields()
+                                    obj.saved = false
+                                }
+
                                 self.toggle_loader()
                             },
-                            dataType: 'JSON',
-                            error: function(){
+                            dataType: 'json',
+                            error: function() {
                                 obj.saved = false
                             }
                         })
                     }
-                    return 
+                    return
                 }
 
 
@@ -349,21 +486,26 @@
                 obj.click(function(e) {
                     e.preventDefault()
 
-                    if (obj.is_opend) {
+                    if (obj.loader.state == 'off') {
 
-                        if (comment_obj.is_valid(obj.changed) || !obj.changed) {
-                            $(obj.fields).each(function(index, name) {
-                                obj.fields_obj[name].readmyself()
-                            })
+                        if (obj.is_opend) {
 
-                            obj.lock_fields()
-                            obj.save()
+                            if (comment_obj.is_valid(obj.changed) || !obj.changed) {
+                                $(obj.fields).each(function(index, name) {
+                                    obj.fields_obj[name].readmyself()
+                                })
+
+                                obj.lock_fields()
+                                obj.save()
+                                
+                            }
+
+                        } else {
+
+                            obj.unlock_fields()
+                            obj.fields_obj[obj.fields[0]].find('input').focus()
                         }
 
-                    } else {
-
-                        obj.unlock_fields()
-                        obj.fields_obj[obj.fields[0]].find('input').focus()
                     }
 
 
@@ -373,14 +515,37 @@
                 obj.lock_fields()
 
 
+
             });
+
+
         }
     });
 
     $(document).ready(function() {
-        $('a[class^=editButton]').makeEditable()
-    })
+        objs = $('a[class^=editButton]').makeEditable()
+        $(window).bind('beforeunload', function(event) {
+            if (objects_is_opend()) {
+                return "Вы не сохранили изменения в профиле пользователя! Всеровно закрыть или остатся?"
+            }
+        })
 
+
+
+    })
+    
+    
+    
+    function objects_is_opend(){
+        objs = $('a[class^=editButton]')
+        is_opend = false
+        objs.each(function(index, obj) {
+            if ($(obj).attr('is_opend') == 1) {
+                is_opend = true
+            }
+        })
+        return is_opend
+    }
 
 
 })(django.jQuery);
