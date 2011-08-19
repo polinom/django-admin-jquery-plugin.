@@ -98,7 +98,26 @@
             comment_obj.text_field = undefined
             comment_obj.communication = undefined
 
+           
+           comment_obj.bind('keydown',
+            function(e) {
+                if (e.keyCode == 13) {
+                    obj.click()
+                }
+            })
+           
+           
+           comment_obj.show_form = function(){
+               
+               comment_obj.fadeIn("fast")
+               comment_obj.hidden = false
+           }
 
+
+           comment_obj.hide_form = function(){
+               comment_obj.fadeOut("fast")
+               comment_obj.hidden = true
+           }
 
             //blinking method
             comment_obj.warning_blink = function() {
@@ -214,6 +233,7 @@
 
 
                 obj.lock_fields = function() {
+                    
                     $(obj.fields).each(function(index, name) {
                         field = obj.fields_obj[name]
                         field.css({
@@ -245,6 +265,7 @@
                         field.find('b').remove()
 
                     })
+                    
                 }
 
 
@@ -454,10 +475,12 @@
                                 if (resp['messages']) {
                                     messanger.set_info(resp['messages'])
                                     obj.clear_errors()
-                                    if (!objects_is_opend()) {
-                                       comment_obj.clear_text()   
-                                    }
                                     obj.set_changed(false)
+                                    if (!objects_is_opend()) {
+                                       comment_obj.clear_text()
+                                       comment_obj.hide_form()
+                                    }
+                                    
                                 } else if (resp['errors']) {
                                     obj.clear_errors()
                                     $.each(resp['errors'],
@@ -485,9 +508,9 @@
                 //bind click for editButton class
                 obj.click(function(e) {
                     e.preventDefault()
-
+           
                     if (obj.loader.state == 'off') {
-
+                        comment_obj.show_form()
                         if (obj.is_opend) {
 
                             if (comment_obj.is_valid(obj.changed) || !obj.changed) {
@@ -507,7 +530,6 @@
                         }
 
                     }
-
 
                 })
 
@@ -529,9 +551,6 @@
                 return "Вы не сохранили изменения в профиле пользователя! Всеровно закрыть или остатся?"
             }
         })
-
-
-
     })
     
     
