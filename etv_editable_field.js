@@ -144,7 +144,7 @@
             }
             
             comment_obj.clear_text = function(){
-                comment_obj.fields.comment = comment_obj.find('textarea').attr('value','')
+                comment_obj.find('textarea').attr('value','')
             }
 
 
@@ -262,15 +262,17 @@
                         }
                         
                         
-                        if (!obj.changed){
-                            comment_obj.hide_form()
-                        }
-                        
-                        
-                        obj.set_opend(false)
                         field.find('b').remove()
 
                     })
+                    
+                    obj.set_opend(false)
+                    
+                    if (!objects_is_opend()){
+                           comment_obj.hide_form()
+                    }
+                        
+                    
                     
                 }
 
@@ -316,6 +318,11 @@
                         }
                         obj.set_opend(true)
                     })
+                    
+
+                           comment_obj.show_form()
+
+                    
                 }
 
 
@@ -347,7 +354,9 @@
 
                 //obj method to get fields and values for each field
                 obj.read_fields = function() {
-                    self = this
+                    
+                    
+                    var self = this
 
                     //get values from INPUT fields if present
                     related_imputs.each(function(item, o) {
@@ -464,11 +473,10 @@
 
                 //method save to save object on the server
                 obj.save = function() {
-
                     obj.saved = true
-                    data = {}
+                    var data = {}
                     $.extend(data, this.fields_val, comment_obj.fields)
-                    self = this
+                    var self = this
                     if (self.changed) {
                         $.ajax({
                             type: 'POST',
@@ -484,7 +492,7 @@
                                     obj.set_changed(false)
                                     if (!objects_is_opend()) {
                                        comment_obj.clear_text()
-                                       comment_obj.hide_form()
+                                       // comment_obj.hide_form()
                                     }
                                     
                                 } else if (resp['errors']) {
@@ -516,7 +524,7 @@
                     e.preventDefault()
            
                     if (obj.loader.state == 'off') {
-                        comment_obj.show_form()
+                        // comment_obj.show_form()
                         if (obj.is_opend) {
 
                             if (comment_obj.is_valid(obj.changed) || !obj.changed) {
