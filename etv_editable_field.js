@@ -151,12 +151,13 @@
             // is_valid method for comment window fields,  return true if valid otherwise false
             comment_obj.is_valid = function(raise) {
                 comment_obj.read()
-                valid = true
+                var valid = true
                 if (!comment_obj.fields.comment & raise) {
                     valid = false
                     //alert("Please vedite commentatij k izmeneniyam")
                     messanger.set_error('Введите коментарий к изменениям пожалуйста')
                     comment_obj.warning_blink()
+                    comment_obj.find('textarea').focus()
                 } else {
                     $('.error').css({
                         'display': 'none'
@@ -165,6 +166,7 @@
                 if (!raise) {
                     valid = true
                 }
+                
                 return valid
             }
 
@@ -491,7 +493,7 @@
                                     obj.clear_errors()
                                     obj.set_changed(false)
                                     if (!objects_is_opend()) {
-                                       comment_obj.clear_text()
+                                       //comment_obj.clear_text()
                                        // comment_obj.hide_form()
                                     }
                                     
@@ -565,6 +567,21 @@
                 return "Вы не сохранили изменения в профиле пользователя! Всеровно закрыть или остатся?"
             }
         })
+        
+        
+        $('.save_all').click(function(){
+             objs = $('a[class^=editButton]')
+             objs.each(function(index, obj) {
+                 obj = $(obj)
+                 if (obj.attr('is_opend') == 1) {
+                     obj.click()
+                 }
+             })
+
+         })
+        
+        
+        
     })
     
     
@@ -579,6 +596,8 @@
         })
         return is_opend
     }
+
+
 
 
 })(django.jQuery);
