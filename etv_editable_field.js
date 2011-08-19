@@ -261,6 +261,12 @@
                             field.find('.input_text').remove()
                         }
                         
+                        
+                        if (!obj.changed){
+                            comment_obj.hide_form()
+                        }
+                        
+                        
                         obj.set_opend(false)
                         field.find('b').remove()
 
